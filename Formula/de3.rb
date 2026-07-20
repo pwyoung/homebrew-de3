@@ -13,17 +13,6 @@ class De3 < Formula
   depends_on "python@3.12"
   depends_on "uv"
   
-  # IaC toolchain - these would otherwise be installed by 'de3 setup'
-  # Making them recommended means they're installed by default but can be skipped with --ignore-dependencies
-  depends_on "jq" => :recommended
-  depends_on "yq" => :recommended
-  depends_on "age" => :recommended
-  depends_on "sops" => :recommended
-  depends_on "kubernetes-cli" => :recommended  # kubectl
-  depends_on "helm" => :recommended
-  depends_on "opentofu" => :recommended  # tofu
-  depends_on "terragrunt" => :recommended
-  
   def install
     # Create libexec directory for de3 scripts
     libexec.install "de3", "install.sh"
@@ -57,10 +46,8 @@ class De3 < Formula
         gh auth login
       
       Then run:
+        de3 setup    # Install the IaC toolchain (will use brew on macOS)
         de3 list     # List available packages
-      
-      Most IaC tools have been installed via Homebrew dependencies.
-      Run 'de3 setup' to install any remaining tools or verify the installation.
       
       To update de3:
         de3 update
