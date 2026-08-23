@@ -6,11 +6,20 @@ class De3 < Formula
   # need a token.) Bump tag + revision on every release — the procedure is in
   # packaging/homebrew/README.md in the de3-installer repo.
   url "https://github.com/philwyoungatinsight/de3-installer.git",
-      tag:      "v0.1.7",
-      revision: "43f198d06b8c4ea1aa167061d3fce9f9a76e6765"
-  version "0.1.7"
+      tag:      "v0.1.8",
+      revision: "5d3dcff7f3ecbacb221472395cb506dcc9c19ba7"
+  version "0.1.8"
   license :cannot_represent
   head "https://github.com/philwyoungatinsight/de3-installer.git", branch: "main"
+
+  # Platform gate. Homebrew itself settles the OS — it only runs on macOS and Linux, the
+  # two de3 supports — but not *which* macOS. Big Sur (11) is the floor: the first arm64
+  # release, and the oldest macOS Homebrew still supports, so below it the python@3.12 and
+  # uv dependencies have no bottles to install from. Scoped to on_macos so the formula stays
+  # usable under Linuxbrew, where a bare `depends_on macos:` would fail outright.
+  on_macos do
+    depends_on macos: :big_sur
+  end
 
   # gh   — the de3 repos are private; every clone/pull authenticates through it.
   # uv   — the framework's Python tools build their per-tool venvs with uv, and we use it
@@ -68,6 +77,9 @@ class De3 < Formula
     # The vendored venv must satisfy the framework engine's imports.
     system libexec/"venv/bin/python", "-c", "import yaml, packaging"
     # ...and it must be what a `#!/usr/bin/env python3` shebang resolves to under the wrapper.
-    assert_match "install-method=brew", shell_output("#{bin}/de3 env")
+    de3_env = shell_output("#{bin}/de3 env")
+    assert_match "install-method=brew", de3_env
+    # The dispatcher's own platform gate must agree with what brew just built for.
+    assert_match(/platform=(Darwin|Linux)\//, de3_env)
   end
 end
