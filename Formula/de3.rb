@@ -6,9 +6,9 @@ class De3 < Formula
   # need a token.) Bump tag + revision on every release — the procedure is in
   # packaging/homebrew/README.md in the de3-installer repo.
   url "https://github.com/philwyoungatinsight/de3-installer.git",
-      tag:      "v0.1.8",
-      revision: "5d3dcff7f3ecbacb221472395cb506dcc9c19ba7"
-  version "0.1.8"
+      tag:      "v0.1.9",
+      revision: "c9550f43ab7a4906ca919902a1f61671a815ecc2"
+  version "0.1.9"
   license :cannot_represent
   head "https://github.com/philwyoungatinsight/de3-installer.git", branch: "main"
 
@@ -46,6 +46,8 @@ class De3 < Formula
     ENV["UV_CACHE_DIR"] = buildpath/"uv-cache"   # keep uv's cache inside the build sandbox
     ENV["UV_PYTHON_DOWNLOADS"] = "never"         # use brew's python, never a downloaded one
     system uv, "venv", "--python", Formula["python@3.12"].opt_bin/"python3.12", venv
+    # Same versions install.sh pins for $DE3_HOME/venv — the two install methods must ship
+    # the same Python environment. Bump both together, never one alone.
     system uv, "pip", "install", "--python", venv/"bin/python", "pyyaml==6.0.3", "packaging==26.3"
 
     # PATH: so the framework's python3 is the venv one. DE3_INSTALLED_VIA_BREW: the older
