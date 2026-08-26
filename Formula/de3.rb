@@ -1,5 +1,5 @@
 class De3 < Formula
-  desc "Front end for the de3 hybrid multi-cloud / home-lab IaC ecosystem"
+  desc "Front end for the de3 hybrid multi-cloud / on-prem IaC ecosystem"
   homepage "https://github.com/philwyoungatinsight/de3-installer"
   # Private repo: the git download strategy authenticates through the user's git
   # credential helper, which `gh auth setup-git` configures. (A tarball download would
