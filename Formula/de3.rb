@@ -6,9 +6,9 @@ class De3 < Formula
   # need a token.) Bump tag + revision on every release — the procedure is in
   # packaging/homebrew/README.md in the de3-installer repo.
   url "https://github.com/philwyoungatinsight/de3-installer.git",
-      tag:      "v0.1.10",
-      revision: "24e0e91f939ac8c25830fcf6d6f3e2ac6acecb82"
-  version "0.1.10"
+      tag:      "v0.1.11",
+      revision: "d8efb427be557293bf927d2e46368d626a0ddf71"
+  version "0.1.11"
   license :cannot_represent
   head "https://github.com/philwyoungatinsight/de3-installer.git", branch: "main"
 
