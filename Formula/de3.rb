@@ -54,7 +54,7 @@ class De3 < Formula
     system uv, "venv", "--python", Formula["python@3.12"].opt_bin/"python3.12", venv
     # Same versions install.sh pins for $DE3_HOME/venv — the two install methods must ship
     # the same Python environment. Bump both together, never one alone.
-    system uv, "pip", "install", "--python", venv/"bin/python", "pyyaml==6.0.3", "packaging==26.3"
+    system uv, "pip", "install", "--python", venv/"bin/python", "pyyaml==6.0.3", "packaging==26.3", "ruamel.yaml==0.19.1"
 
     # PATH: so the framework's python3 is the venv one. DE3_INSTALLED_VIA_BREW: the older
     # signal `de3 update` also accepts — set it so this formula works against a pinned
@@ -84,6 +84,9 @@ class De3 < Formula
     assert_match "de3 — front end for the de3 ecosystem", shell_output("#{bin}/de3 help")
     # The vendored venv must satisfy the framework engine's imports.
     system libexec/"venv/bin/python", "-c", "import yaml, packaging"
+    # pkg-mgr's --copy/--rename/--remove import this and refuse without it. Asserted here
+    # because the script installer shipped without it for as long as pkg-mgr had needed it.
+    system libexec/"venv/bin/python", "-c", "import ruamel.yaml"
     # ...and it must be what a `#!/usr/bin/env python3` shebang resolves to under the wrapper.
     # The keg's VERSION file landed and `de3 version` reads it. Without this, a formula
     # bump that forgot the file would still pass while `de3 version` went quiet — in
