@@ -63,7 +63,16 @@ class De3 < Formula
     # PATH: so the framework's python3 is the venv one. DE3_INSTALLED_VIA_BREW: the older
     # signal `de3 update` also accepts — set it so this formula works against a pinned
     # de3 that predates the INSTALL_METHOD sentinel.
-    bin.write_env_script libexec/"de3", PATH: "#{venv}/bin:$PATH", DE3_INSTALLED_VIA_BREW: "1"
+    # (bin/"de3"), not bin. `write_env_script` is a Pathname method that writes the wrapper to
+    # SELF, so calling it on `bin` wrote a FILE named bin where the directory belongs. The keg
+    # then had no bin/ to link, and every symptom followed from that one thing:
+    #   brew install  -> exit 0, "123 files, 1.8MB [Linked]"   (everything else installed)
+    #   de3           -> command not found                     (nothing linked into bin)
+    #   brew test     -> Errno::ENOTDIR .../0.1.13/bin/de3      (bin is not a directory)
+    # ENOTDIR is precisely "a path component is not a directory", which is what named it.
+    # Measured on macOS 26.6.2 / arm64 / Homebrew 6.0.12, de3-developer P1.7.7.
+    (bin/"de3").write_env_script libexec/"de3",
+                                 PATH: "#{venv}/bin:$PATH", DE3_INSTALLED_VIA_BREW: "1"
   end
 
   def caveats
