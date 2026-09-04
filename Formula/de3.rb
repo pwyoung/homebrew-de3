@@ -8,7 +8,10 @@ class De3 < Formula
   url "https://github.com/philwyoungatinsight/de3-installer.git",
       tag:      "v0.1.13",
       revision: "338a0d16b4b7b02b347feeb9719dca3fdd7f3c5b"
-  version "0.1.13"
+  # No `version`: brew scans it from the tag, and `brew audit --new` fails on the explicit
+  # one as "redundant with version scanned from URL" (measured on the Mac, 2026-09-04).
+  # `test do` interpolates #{version} and still gets 0.1.13 — audit only calls it redundant
+  # when the scanned value EQUALS the declared one, which is what makes the removal safe.
   license :cannot_represent
   head "https://github.com/philwyoungatinsight/de3-installer.git", branch: "main"
 
