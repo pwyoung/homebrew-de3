@@ -12,22 +12,25 @@ class De3 < Formula
   license :cannot_represent
   head "https://github.com/philwyoungatinsight/de3-installer.git", branch: "main"
 
-  # Platform gate. Homebrew itself settles the OS — it only runs on macOS and Linux, the
-  # two de3 supports — but not *which* macOS. Big Sur (11) is the floor: the first arm64
-  # release, and the oldest macOS Homebrew still supports, so below it the python@3.12 and
-  # uv dependencies have no bottles to install from. Scoped to on_macos so the formula stays
-  # usable under Linuxbrew, where a bare `depends_on macos:` would fail outright.
-  on_macos do
-    depends_on macos: :big_sur
-  end
-
   # gh   — the de3 repos are private; every clone/pull authenticates through it.
   # uv   — the framework's Python tools build their per-tool venvs with uv, and we use it
   #        here too. Having brew supply it means `de3 setup` only adds the IaC toolchain.
+  #
+  # No `depends_on "git"`: brew treats git as always available and audits against declaring
+  # it. de3 does need git — it clones every repo — but the dependency is brew's to assume.
   depends_on "gh"
-  depends_on "git"
   depends_on "python@3.12"
   depends_on "uv"
+
+  # Platform gate, after the plain dependencies — `brew audit` requires that order. Homebrew
+  # itself settles the OS — it only runs on macOS and Linux, the two de3 supports — but not
+  # *which* macOS. Big Sur (11) is the floor: the first arm64 release, and the oldest macOS
+  # Homebrew still supports, so below it the python@3.12 and uv dependencies have no bottles
+  # to install from. Scoped to on_macos so the formula stays usable under Linuxbrew, where a
+  # bare `depends_on macos:` would fail outright.
+  on_macos do
+    depends_on macos: :big_sur
+  end
 
   def install
     # Just the dispatcher — install.sh is the *other* install method and has no business
@@ -48,13 +51,14 @@ class De3 < Formula
     # venv here, and have the wrapper below put that venv first on PATH, so the
     # `#!/usr/bin/env python3` entry points resolve to a python that can import them.
     venv = libexec/"venv"
-    uv = Formula["uv"].opt_bin/"uv"
+    uv = formula_opt_bin("uv")/"uv"
     ENV["UV_CACHE_DIR"] = buildpath/"uv-cache"   # keep uv's cache inside the build sandbox
     ENV["UV_PYTHON_DOWNLOADS"] = "never"         # use brew's python, never a downloaded one
-    system uv, "venv", "--python", Formula["python@3.12"].opt_bin/"python3.12", venv
+    system uv, "venv", "--python", formula_opt_bin("python@3.12")/"python3.12", venv
     # Same versions install.sh pins for $DE3_HOME/venv — the two install methods must ship
     # the same Python environment. Bump both together, never one alone.
-    system uv, "pip", "install", "--python", venv/"bin/python", "pyyaml==6.0.3", "packaging==26.3", "ruamel.yaml==0.19.1"
+    system uv, "pip", "install", "--python", venv/"bin/python",
+           "pyyaml==6.0.3", "packaging==26.3", "ruamel.yaml==0.19.1"
 
     # PATH: so the framework's python3 is the venv one. DE3_INSTALLED_VIA_BREW: the older
     # signal `de3 update` also accepts — set it so this formula works against a pinned
@@ -95,6 +99,6 @@ class De3 < Formula
     de3_env = shell_output("#{bin}/de3 env")
     assert_match "install-method=brew", de3_env
     # The dispatcher's own platform gate must agree with what brew just built for.
-    assert_match(/platform=(Darwin|Linux)\//, de3_env)
+    assert_match(%r{platform=(Darwin|Linux)/}, de3_env)
   end
 end
