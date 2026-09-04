@@ -66,6 +66,17 @@ class De3 < Formula
     # PATH: so the framework's python3 is the venv one. DE3_INSTALLED_VIA_BREW: the older
     # signal `de3 update` also accepts — set it so this formula works against a pinned
     # de3 that predates the INSTALL_METHOD sentinel.
+    #
+    # VIRTUAL_ENV is NOT optional, and PATH alone is not enough. set_env.sh resolves the
+    # interpreter as $VIRTUAL_ENV/bin/python3, then $DE3_HOME/venv/bin/python3, then REFUSES --
+    # it ignores PATH on purpose (D6: "Resolve, never inherit"). A brew-only install has no
+    # $DE3_HOME/venv, so with PATH as the only advertisement of the keg's venv the resolver
+    # correctly found nothing and `de3 update` died:
+    #   ERROR: set_env.sh found no de3 python.
+    #          Looked in: $VIRTUAL_ENV and /Users/pyoung/de3/venv/bin.
+    # Measured on the Mac 2026-09-04 (de3-developer P1.7.9). Setting VIRTUAL_ENV is what a venv
+    # activation actually is -- PATH plus VIRTUAL_ENV -- and it uses the resolver's EXISTING
+    # first tier rather than teaching it about Homebrew, so D6's "no third tier" still holds.
     # (bin/"de3"), not bin. `write_env_script` is a Pathname method that writes the wrapper to
     # SELF, so calling it on `bin` wrote a FILE named bin where the directory belongs. The keg
     # then had no bin/ to link, and every symptom followed from that one thing:
@@ -75,7 +86,9 @@ class De3 < Formula
     # ENOTDIR is precisely "a path component is not a directory", which is what named it.
     # Measured on macOS 26.6.2 / arm64 / Homebrew 6.0.12, de3-developer P1.7.7.
     (bin/"de3").write_env_script libexec/"de3",
-                                 PATH: "#{venv}/bin:$PATH", DE3_INSTALLED_VIA_BREW: "1"
+                                 PATH:                  "#{venv}/bin:$PATH",
+                                 VIRTUAL_ENV:           venv,
+                                 DE3_INSTALLED_VIA_BREW: "1"
   end
 
   def caveats
