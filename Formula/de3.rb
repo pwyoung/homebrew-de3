@@ -58,10 +58,26 @@ class De3 < Formula
     ENV["UV_CACHE_DIR"] = buildpath/"uv-cache"   # keep uv's cache inside the build sandbox
     ENV["UV_PYTHON_DOWNLOADS"] = "never"         # use brew's python, never a downloaded one
     system uv, "venv", "--python", formula_opt_bin("python@3.12")/"python3.12", venv
-    # Same versions install.sh pins for $DE3_HOME/venv — the two install methods must ship
-    # the same Python environment. Bump both together, never one alone.
+    # The first three are the versions install.sh:193 pins for $DE3_HOME/venv — the two
+    # install methods must ship the same Python environment. Bump together, never one alone.
+    #
+    # ansible-core is the DELIBERATE exception, and the reason is that a keg is not a venv you
+    # can add to. `de3 setup` installs _setup/requirements.txt, which carries ansible-core
+    # (added by P1.9.7 because every ansible smoke test in the ecosystem had silently stopped
+    # running). Since P1.7.9 the wrapper points VIRTUAL_ENV at THIS venv, so on a brew install
+    # setup wrote ansible-core in here — and `brew upgrade` rebuilds the keg from this formula
+    # and would silently discard it, putting those tests back to not running. Measured on
+    # macOS 26.6.2 2026-09-05: the keg venv is writable, setup resolved python3 to it, and its
+    # package install exited 0. So it is baked here instead, which also makes `de3 setup`'s
+    # python step a genuine no-op on brew.
+    #
+    # install.sh does NOT pin ansible-core, and that asymmetry is correct: $DE3_HOME/venv is
+    # writable and survives, so `de3 setup` can add to it. Only the keg cannot be added to.
+    # THREE places now move together — this line, install.sh:193, and _setup/requirements.txt.
+    # (de3-developer P1.7.10)
     system uv, "pip", "install", "--python", venv/"bin/python",
-           "pyyaml==6.0.3", "packaging==26.3", "ruamel.yaml==0.19.1"
+           "pyyaml==6.0.3", "packaging==26.3", "ruamel.yaml==0.19.1",
+           "ansible-core==2.21.3"
 
     # PATH: so the framework's python3 is the venv one. DE3_INSTALLED_VIA_BREW: the older
     # signal `de3 update` also accepts — set it so this formula works against a pinned
@@ -116,6 +132,10 @@ class De3 < Formula
     # pkg-mgr's --copy/--rename/--remove import this and refuse without it. Asserted here
     # because the script installer shipped without it for as long as pkg-mgr had needed it.
     system libexec/"venv/bin/python", "-c", "import ruamel.yaml"
+    # ansible-core is baked into the keg rather than left to `de3 setup`, because an upgrade
+    # rebuilds the keg and would discard anything setup added. Asserted so a future edit that
+    # drops it fails here instead of silently un-running every ansible test (P1.7.10).
+    system libexec/"venv/bin/python", "-c", "import ansible"
     # ...and it must be what a `#!/usr/bin/env python3` shebang resolves to under the wrapper.
     # The keg's VERSION file landed and `de3 version` reads it. Without this, a formula
     # bump that forgot the file would still pass while `de3 version` went quiet — in
