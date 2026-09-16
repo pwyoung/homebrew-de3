@@ -1,11 +1,11 @@
 class De3 < Formula
   desc "Front end for the de3 hybrid multi-cloud / on-prem IaC ecosystem"
-  homepage "https://github.com/philwyoungatinsight/de3-installer"
+  homepage "https://github.com/pwyoung/de3-installer"
   # Private repo: the git download strategy authenticates through the user's git
   # credential helper, which `gh auth setup-git` configures. (A tarball download would
   # need a token.) Bump tag + revision on every release — the procedure is in
   # packaging/homebrew/README.md in the de3-installer repo.
-  url "https://github.com/philwyoungatinsight/de3-installer.git",
+  url "https://github.com/pwyoung/de3-installer.git",
       tag:      "v0.1.13",
       revision: "338a0d16b4b7b02b347feeb9719dca3fdd7f3c5b"
   # No `version`: brew scans it from the tag, and `brew audit --new` fails on the explicit
@@ -13,7 +13,7 @@ class De3 < Formula
   # `test do` interpolates #{version} and still gets 0.1.13 — audit only calls it redundant
   # when the scanned value EQUALS the declared one, which is what makes the removal safe.
   license :cannot_represent
-  head "https://github.com/philwyoungatinsight/de3-installer.git", branch: "main"
+  head "https://github.com/pwyoung/de3-installer.git", branch: "main"
 
   # gh   — the de3 repos are private; every clone/pull authenticates through it.
   # uv   — the framework's Python tools build their per-tool venvs with uv, and we use it
