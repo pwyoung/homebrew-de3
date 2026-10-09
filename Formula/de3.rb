@@ -6,8 +6,8 @@ class De3 < Formula
   # need a token.) Bump tag + revision on every release — the procedure is in
   # packaging/homebrew/README.md in the de3-installer repo.
   url "https://github.com/pwyoung/de3-installer.git",
-      tag:      "v0.1.13",
-      revision: "338a0d16b4b7b02b347feeb9719dca3fdd7f3c5b"
+      tag:      "v0.1.14",
+      revision: "753e1f2db106a9f7cd59253468e9f2a41ecdc4e2"
   # No `version`: brew scans it from the tag, and `brew audit --new` fails on the explicit
   # one as "redundant with version scanned from URL" (measured on the Mac, 2026-09-04).
   # `test do` interpolates #{version} and still gets 0.1.13 — audit only calls it redundant
@@ -15,7 +15,8 @@ class De3 < Formula
   license :cannot_represent
   head "https://github.com/pwyoung/de3-installer.git", branch: "main"
 
-  # gh   — the de3 repos are private; every clone/pull authenticates through it.
+  # gh   — brew fetches this private installer over HTTPS through gh's credential helper.
+  #        de3 itself clones every other repo over SSH and needs a GitHub SSH key.
   # uv   — the framework's Python tools build their per-tool venvs with uv, and we use it
   #        here too. Having brew supply it means `de3 setup` only adds the IaC toolchain.
   #
