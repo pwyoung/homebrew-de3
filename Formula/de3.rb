@@ -6,8 +6,8 @@ class De3 < Formula
   # need a token.) Bump tag + revision on every release — the procedure is in
   # packaging/homebrew/README.md in the de3-installer repo.
   url "https://github.com/pwyoung/de3-installer.git",
-      tag:      "v0.1.14",
-      revision: "753e1f2db106a9f7cd59253468e9f2a41ecdc4e2"
+      tag:      "v0.1.15",
+      revision: "19d83502a4adeba8c34d026e20a3e2bb74515584"
   # No `version`: brew scans it from the tag, and `brew audit --new` fails on the explicit
   # one as "redundant with version scanned from URL" (measured on the Mac, 2026-09-04).
   # `test do` interpolates #{version} and still gets 0.1.13 — audit only calls it redundant
